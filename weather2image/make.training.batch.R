@@ -9,6 +9,7 @@ if(!file.exists(source.dir)) dir.create(source.dir,recursive=TRUE)
 target.dir<-sprintf("%s/ML/training/target",Sys.getenv('SCRATCH'))
 if(!file.exists(target.dir)) dir.create(target.dir,recursive=TRUE)
 
+# These are the years I happened to have downloaded the data for 
 for(year in c(2004,1996,1988,1980,1972,1964,1956,
               1948,1940,1932,1924,1916,1908,1900)) {
 
