@@ -2,22 +2,25 @@
 
 # Convert a p2p packed image into something a human can look at
 # 4 panels - composite, air.2m, prmsl, & prate
-# Mare the areas where the forecast is better than persistence
+# Mark the areas where the forecast is better than persistence
 
 library(GSDF)
 library(GSDF.WeatherMap)
 library(grid)
 library(getopt)
 library(jpeg)
+library(png)
 
 opt = getopt(c(
-  'forecast', 'i', 2, "character",
-  'source',   'l', 2, "character",
+  'forecast', 'f', 2, "character",
+  'input',    'i', 2, "character",
+  'target',   't', 2, "character",
   'output',   'o', 2, "character",
   'label',    'c', 2, "character"
 ))
 if ( is.null(opt$forecast) ) stop("Forecast file not specified") 
-if ( is.null(opt$source) ) stop("Source file not specified") 
+if ( is.null(opt$input) ) stop("Inputfile not specified") 
+if ( is.null(opt$target) ) stop("Inputfile not specified") 
 if ( is.null(opt$output) ) stop("Output file not specified") 
 
 Imagedir<-dirname(opt$output)
@@ -36,23 +39,19 @@ Options<-WeatherMap.set.option(Options,'wrap.spherical',F)
 Options$mslp.base=101325                    # Base value for anomalies
 Options$mslp.range=50000                    # Anomaly for max contour
 Options$mslp.step=500                       # Smaller -> more contours
-#Options$mslp.tpscale=500                    # Smaller -> contours less transparent
+#Options$mslp.tpscale=500                   # Smaller -> contours less transparent
 Options$mslp.lwd=1
 Options$precip.colour=c(0,0.2,0)
 Options$label.xp=0.995
 
 Options$fog.colour=c(255/255,215/255,0)     # Use for marking success
-Options$fog.min.transparency=0.5
+Options$fog.min.transparency=0.3
 
-unpack.image<-function(image.file,left) {
-  img<-readJPEG(image.file)
-  if(!all(dim(img)==c(256,512,3))) {
+
+unpack.image.forecast<-function(image.file) {
+  img<-readPNG(image.file)
+  if(!all(dim(img)==c(256,256,3))) {
     stop(sprintf("Invalid image dimensions for %s",image.file))
-  }
-  if(left) {
-    img<-img[,1:256,]
-  } else {
-    img<-img[,257-512,]
   }
   g<-GSDF()
   g$dimensions[[1]]<-list(type='lat',
@@ -68,7 +67,6 @@ unpack.image<-function(image.file,left) {
   result$prmsl$data<-img[,,3]*10000+95000
   return(result)
 }
-
 
 Draw.temperature<-function(temperature,Options,Trange=1) {
 
@@ -144,9 +142,9 @@ Draw.pressure<-function(mslp,Options,colour=c(0,0,0)) {
 }
 
 
-    f.data<-unpack.image(opt$forecast,TRUE)
-    s.data<-unpack.image(opt$source,TRUE) # initial time
-    v.data<-unpack.image(opt$source,FALSE) # T+6 - forecast truth
+    f.data<-unpack.image.forecast(opt$forecast)
+    s.data<-unpack.image.forecast(opt$input) # initial time
+    v.data<-unpack.image.forecast(opt$target) # T+6 - forecast truth
 
     ifile.name<-opt$output
 
@@ -157,8 +155,8 @@ Draw.pressure<-function(mslp,Options,colour=c(0,0,0)) {
     prate<-f.data$prate
  
      png(ifile.name,
-             width=1080*16/9,
-             height=1080,
+             width=1080*16/9*0.75,
+             height=1080*0.75,
              bg='white',
              pointsize=24,
              type='cairo')
