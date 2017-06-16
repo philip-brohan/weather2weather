@@ -12,16 +12,18 @@ library(jpeg)
 library(png)
 
 opt = getopt(c(
-  'forecast', 'f', 2, "character",
-  'input',    'i', 2, "character",
-  'target',   't', 2, "character",
-  'output',   'o', 2, "character",
-  'label',    'c', 2, "character"
+  'forecast',      'f', 2, "character",
+  'input',         'i', 2, "character",
+  'target',        't', 2, "character",
+  'output',        'o', 2, "character",
+  'label',         'c', 2, "character",
+  'increment.sds', 's', 2, "character"
 ))
 if ( is.null(opt$forecast) ) stop("Forecast file not specified") 
-if ( is.null(opt$input) ) stop("Inputfile not specified") 
-if ( is.null(opt$target) ) stop("Inputfile not specified") 
-if ( is.null(opt$output) ) stop("Output file not specified") 
+if ( is.null(opt$input) )    stop("Input file not specified") 
+if ( is.null(opt$target) )   stop("Target file not specified") 
+if ( is.null(opt$output) )   stop("Output file not specified") 
+if ( is.null(opt$increment.sds) )   stop("Increment sd file not specified") 
 
 Imagedir<-dirname(opt$output)
 if(!file.exists(Imagedir)) dir.create(Imagedir,recursive=TRUE)
@@ -45,8 +47,10 @@ Options$precip.colour=c(0,0.2,0)
 Options$label.xp=0.995
 
 Options$fog.colour=c(255/255,215/255,0)     # Use for marking success
-Options$fog.min.transparency=0.3
+Options$fog.min.transparency=0.8
 
+# Load the increment SDs
+increment.sds<-readRDS(opt$increment.sds)
 
 unpack.image.forecast<-function(image.file) {
   img<-readPNG(image.file)
@@ -149,11 +153,7 @@ Draw.pressure<-function(mslp,Options,colour=c(0,0,0)) {
     ifile.name<-opt$output
 
     land<-WeatherMap.get.land(Options)
-    
-    t2m<-f.data$air.2m
-    prmsl.T<-f.data$prmsl
-    prate<-f.data$prate
- 
+     
      png(ifile.name,
              width=1080*16/9*0.75,
              height=1080*0.75,
@@ -171,7 +171,7 @@ Draw.pressure<-function(mslp,Options,colour=c(0,0,0)) {
       if(!is.null(Options$vp.lat.max)) lat.max<-Options$vp.lat.max
       base.gp<-gpar(family='Helvetica',font=1,col='black')
 
-# Composite plot in top left
+# Composite forecast plot in top left
     pushViewport(viewport(x=unit(0.25,'npc'),y=unit(0.75,'npc'),
                  width=unit(0.4944,'npc'),height=unit(0.49,'npc'),
                  gp=base.gp))
@@ -183,14 +183,14 @@ Draw.pressure<-function(mslp,Options,colour=c(0,0,0)) {
                                 extension=0,gp=base.gp))
     
       WeatherMap.draw.land(land,Options)
-      Draw.temperature(t2m,Options,Trange=10)
-      WeatherMap.draw.precipitation(prate,Options)
-      Draw.pressure(prmsl.T,Options,colour=c(0,0,0))
+      Draw.temperature(f.data$air.2m,Options,Trange=10)
+      WeatherMap.draw.precipitation(f.data$prate,Options)
+      Draw.pressure(f.data$prmsl,Options,colour=c(0,0,0))
       popViewport()
 
     popViewport()
 
-  # Pressure only in top right
+  # Composite target in top right
     pushViewport(viewport(x=unit(0.75,'npc'),y=unit(0.75,'npc'),
                  width=unit(0.4944,'npc'),height=unit(0.49,'npc'),
                  gp=base.gp))
@@ -200,22 +200,16 @@ Draw.pressure<-function(mslp,Options,colour=c(0,0,0)) {
 
       pushViewport(dataViewport(c(lon.min,lon.max),c(lat.min,lat.max),
                                 extension=0,gp=base.gp))
-    
       WeatherMap.draw.land(land,Options)
-      Draw.pressure(prmsl.T,Options,colour=c(0,0,0))
-      # Mark the regions where f is closer to v than f
-      #  I.e. where the forecast is better than persistence
-      fog<-f.data$prmsl
-      fog$data[]<-fog$data*0
-      w<-which(abs(f.data$prmsl$data-v.data$prmsl$data)<=
-               abs(s.data$prmsl$data-v.data$prmsl$data))
-      if(length(w)>0) fog$data[w]<-1
-      WeatherMap.draw.fog(fog,Options)
+      Draw.temperature(v.data$air.2m,Options,Trange=10)
+      WeatherMap.draw.precipitation(v.data$prate,Options)
+      Draw.pressure(v.data$prmsl,Options,colour=c(0,0,0))
       popViewport()
 
     popViewport()
 
-  # Temperature only in bottom left
+
+  # Multi-pressure only in bottom left
     pushViewport(viewport(x=unit(0.25,'npc'),y=unit(0.25,'npc'),
                  width=unit(0.4944,'npc'),height=unit(0.49,'npc'),
                  gp=base.gp))
@@ -227,20 +221,16 @@ Draw.pressure<-function(mslp,Options,colour=c(0,0,0)) {
                                 extension=0,gp=base.gp))
     
       WeatherMap.draw.land(land,Options)
-      Draw.temperature(t2m,Options,Trange=10)
-      # Mark the regions where f is closer to v than f
-      #  I.e. where the forecast is better than persistence
-      fog<-f.data$air.2m
-      fog$data[]<-fog$data*0
-      w<-which(abs(f.data$air.2m$data-v.data$air.2m$data)<=
-               abs(s.data$air.2m$data-v.data$air.2m$data))
-      if(length(w)>0) fog$data[w]<-1
-      WeatherMap.draw.fog(fog,Options)
+      Options$mslp.step=1000 # fewer contours - less messy
+      Draw.pressure(s.data$prmsl,Options,colour=c(0,0,0))
+      Draw.pressure(f.data$prmsl,Options,colour=c(1,0,0))
+      Draw.pressure(v.data$prmsl,Options,colour=c(0,0,1))
+
       popViewport()
 
     popViewport()
 
-  # Precip only in bottom right
+  # Pressure skill in bottom right
     pushViewport(viewport(x=unit(0.75,'npc'),y=unit(0.25,'npc'),
                  width=unit(0.4944,'npc'),height=unit(0.49,'npc'),
                  gp=base.gp))
@@ -252,14 +242,10 @@ Draw.pressure<-function(mslp,Options,colour=c(0,0,0)) {
                                 extension=0,gp=base.gp))
     
       WeatherMap.draw.land(land,Options)
-      WeatherMap.draw.precipitation(prate,Options)
-      # Mark the regions where f is closer to v than f
-      #  I.e. where the forecast is better than persistence
-      fog<-f.data$prate
-      fog$data[]<-fog$data*0
-      w<-which(abs(f.data$prate$data-v.data$prate$data)<=
-               abs(s.data$prate$data-v.data$prate$data))
-      if(length(w)>0) fog$data[w]<-1
+      Draw.pressure(f.data$prmsl,Options,colour=c(1,0,0))
+      inc<-abs(f.data$prmsl$data-v.data$prmsl$data)/(increment.sds/2)
+      fog<-f.data$prmsl
+      fog$data[]<-pmax(0,pmin(1,1-inc))
       WeatherMap.draw.fog(fog,Options)
 
       if(!is.null(opt$label)) {

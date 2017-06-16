@@ -1,6 +1,6 @@
 # Forecast the weather using tensorflow and the pix2pix model.
 
-Conditional Adversarial Networks offer a general machine learning tool to build a model deriving one (image) dataset from another. Originally demonstrated as a tool called [pix2pix](https://arxiv.org/pdf/1611.07004v1.pdf)
+Conditional Adversarial Networks offer a general machine learning tool to build a model deriving one (image) dataset from another. Originally demonstrated as a tool called [pix2pix](https://arxiv.org/pdf/1611.07004v1.pdf). Here I'm using a tensorflow port of this technique [pix2pix-tensorflow](https://github.com/affinelayer/pix2pix-tensorflow).
 
 ## The idea is to use pix2pix to transform an image describing the weather into an image describing the weather 6-hours later (a forecast).
 
