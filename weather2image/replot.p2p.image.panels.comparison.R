@@ -47,7 +47,7 @@ Options$precip.colour=c(0,0.2,0)
 Options$label.xp=0.995
 
 Options$fog.colour=c(255/255,215/255,0)     # Use for marking success
-Options$fog.min.transparency=0.8
+Options$fog.min.transparency=0.4
 
 # Load the increment SDs
 increment.sds<-readRDS(opt$increment.sds)
@@ -209,7 +209,7 @@ Draw.pressure<-function(mslp,Options,colour=c(0,0,0)) {
     popViewport()
 
 
-  # Multi-pressure only in bottom left
+  # Target pressure increment in bottom left
     pushViewport(viewport(x=unit(0.25,'npc'),y=unit(0.25,'npc'),
                  width=unit(0.4944,'npc'),height=unit(0.49,'npc'),
                  gp=base.gp))
@@ -221,16 +221,14 @@ Draw.pressure<-function(mslp,Options,colour=c(0,0,0)) {
                                 extension=0,gp=base.gp))
     
       WeatherMap.draw.land(land,Options)
-      Options$mslp.step=1000 # fewer contours - less messy
-      Draw.pressure(s.data$prmsl,Options,colour=c(0,0,0))
-      Draw.pressure(f.data$prmsl,Options,colour=c(1,0,0))
-      Draw.pressure(v.data$prmsl,Options,colour=c(0,0,1))
-
+      t.increment<-v.data$prmsl
+      t.increment$data[]<-t.increment$data-s.data$prmsl$data
+      Draw.temperature(t.increment,Options,Trange=1000)
       popViewport()
 
     popViewport()
 
-  # Pressure skill in bottom right
+  # Forecast pressure increment & skill in bottom right
     pushViewport(viewport(x=unit(0.75,'npc'),y=unit(0.25,'npc'),
                  width=unit(0.4944,'npc'),height=unit(0.49,'npc'),
                  gp=base.gp))
@@ -242,11 +240,16 @@ Draw.pressure<-function(mslp,Options,colour=c(0,0,0)) {
                                 extension=0,gp=base.gp))
     
       WeatherMap.draw.land(land,Options)
-      Draw.pressure(f.data$prmsl,Options,colour=c(1,0,0))
-      inc<-abs(f.data$prmsl$data-v.data$prmsl$data)/(increment.sds/2)
-      fog<-f.data$prmsl
-      fog$data[]<-pmax(0,pmin(1,1-inc))
-      WeatherMap.draw.fog(fog,Options)
+      f.increment<-f.data$prmsl
+      f.increment$data[]<-f.increment$data-s.data$prmsl$data
+      Draw.temperature(f.increment,Options,Trange=1000)
+      fog<-f.increment
+      fog$data[]<-fog$data*0
+      f.error<-f.data$prmsl
+      f.error$data[]<-f.error$data-v.data$prmsl$data
+      w<-which(abs(f.error$data/increment.sds)<0.075)
+      if(length(w)>0) fog$data[w]<-1
+      #WeatherMap.draw.fog(fog,Options)
 
       if(!is.null(opt$label)) {
         Options$label<-opt$label
