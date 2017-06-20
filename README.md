@@ -34,8 +34,16 @@ python weather2weather.py \
   --checkpoint $SCRATCH/weather2weather/model_train
 ```
 
-The test run will output an HTML file at `$SCRATCH/weather2weather/model_test/index.html` that shows input/output/target image sets. This is good for a first glance, but those images are in a packed analysis form. So we need a tool to convert the packed image pairs to a clearer image format: [Script](./weather2image/replot.p2p.image.R)
+The test run will output an HTML file at `$SCRATCH/weather2weather/model_test/index.html` that shows input/output/target image sets. This is good for a first glance, but those images are in a packed analysis form. So we need a tool to convert the packed image pairs to a clearer image format: [Script](./weather2image/replot.p2p.image.R). This shows target weather (top left), model output weather (top right), target pressure increment (bottom left), and model output pressure increment (bottom right).
 
+To postprocess all the test cases run:
+```sh
+./weather2image/replot_all_validation.R \
+  --input.dir=$SCRATCH/weather2weather/model_test/images \
+  --output.dir=$SCRATCH/weather2weather/model_test/postprocessed
+```
+
+This will produce an HTML file at  `$SCRATCH/weather2weather/model_test/index.html` showing results of all the test cases.
 ### Tips
 
 You can look at the loss and computation graph using tensorboard:

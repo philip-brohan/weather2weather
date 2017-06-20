@@ -11,19 +11,17 @@ library(getopt)
 library(jpeg)
 library(png)
 
-opt = getopt(c(
+opt = getopt(matrix(c(
   'forecast',      'f', 2, "character",
   'input',         'i', 2, "character",
   'target',        't', 2, "character",
   'output',        'o', 2, "character",
-  'label',         'c', 2, "character",
-  'increment.sds', 's', 2, "character"
-))
+  'label',         'c', 2, "character"
+), byrow=TRUE, ncol=4))
 if ( is.null(opt$forecast) ) stop("Forecast file not specified") 
 if ( is.null(opt$input) )    stop("Input file not specified") 
 if ( is.null(opt$target) )   stop("Target file not specified") 
 if ( is.null(opt$output) )   stop("Output file not specified") 
-if ( is.null(opt$increment.sds) )   stop("Increment sd file not specified") 
 
 Imagedir<-dirname(opt$output)
 if(!file.exists(Imagedir)) dir.create(Imagedir,recursive=TRUE)
@@ -47,10 +45,7 @@ Options$precip.colour=c(0,0.2,0)
 Options$label.xp=0.995
 
 Options$fog.colour=c(255/255,215/255,0)     # Use for marking success
-Options$fog.min.transparency=0.4
-
-# Load the increment SDs
-increment.sds<-readRDS(opt$increment.sds)
+Options$fog.min.transparency=0.2
 
 unpack.image.forecast<-function(image.file) {
   img<-readPNG(image.file)
@@ -228,7 +223,7 @@ Draw.pressure<-function(mslp,Options,colour=c(0,0,0)) {
 
     popViewport()
 
-  # Forecast pressure increment & skill in bottom right
+  # Forecast pressure incrementin bottom right
     pushViewport(viewport(x=unit(0.75,'npc'),y=unit(0.25,'npc'),
                  width=unit(0.4944,'npc'),height=unit(0.49,'npc'),
                  gp=base.gp))
@@ -243,13 +238,6 @@ Draw.pressure<-function(mslp,Options,colour=c(0,0,0)) {
       f.increment<-f.data$prmsl
       f.increment$data[]<-f.increment$data-s.data$prmsl$data
       Draw.temperature(f.increment,Options,Trange=1000)
-      fog<-f.increment
-      fog$data[]<-fog$data*0
-      f.error<-f.data$prmsl
-      f.error$data[]<-f.error$data-v.data$prmsl$data
-      w<-which(abs(f.error$data/increment.sds)<0.075)
-      if(length(w)>0) fog$data[w]<-1
-      #WeatherMap.draw.fog(fog,Options)
 
       if(!is.null(opt$label)) {
         Options$label<-opt$label
