@@ -159,6 +159,7 @@ for(hour in seq(0,5,1)) {
     t2m<-c.data$air.2m
     prmsl.T<-c.data$prmsl
     prate<-c.data$prate
+    img.label<-"+%d:%02d",as.integer((step*6+hour)/24),as.integer((step*6+hour)%%24)
  
      png(opfile,
              width=1080*16/9,
@@ -182,8 +183,8 @@ for(hour in seq(0,5,1)) {
       Draw.temperature(t2m,Options,Trange=10)
        WeatherMap.draw.precipitation(prate,Options)
     Draw.pressure(prmsl.T,Options,colour=c(0,0,0))
-     if(!is.null(opt$label)) {
-      Options$label<-opt$label
+     if(!is.null(img.label)) {
+      Options$label<-img.label
       WeatherMap.draw.label(Options)
     }
     dev.off()
