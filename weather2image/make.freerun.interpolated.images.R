@@ -10,16 +10,12 @@ library(grid)
 library(getopt)
 library(png)
 
-opt = getopt(c(
+opt = getopt(matrix(c(
   'image.dir', 'i', 2, "character",
-  'step',      's', 2, "integer",
-))
+  'step',      's', 2, "integer"
+), byrow=TRUE, ncol=4))
 if ( is.null(opt$image.dir) ) stop("Image directory not specified") 
-if ( is.null(opt$left) )  opt$left<-TRUE
-if ( is.null(opt$output) ) stop("Output file not specified") 
-
-Imagedir<-dirname(opt$output)
-if(!file.exists(Imagedir)) dir.create(Imagedir,recursive=TRUE)
+if ( is.null(opt$step) ) stop("Step not specified") 
 
 Options<-WeatherMap.set.option(NULL)
 Options<-WeatherMap.set.option(Options,'land.colour',rgb(100,100,100,255,
@@ -133,11 +129,11 @@ Draw.pressure<-function(mslp,Options,colour=c(0,0,0)) {
 }
 
 
-s.file<-sprintf("%s/video.%04d.png",opt$image.dir,step)
+s.file<-sprintf("%s/video.%04d.png",opt$image.dir,opt$step)
 if(!file.exists(s.file)) stop(sprintf("Missing file %s",s.file))                           
 s.data<-unpack.image.forecast(s.file)
 e.data<-NULL
-e.file<-sprintf("%s/video.%04d.png",opt$image.dir,step+1)
+e.file<-sprintf("%s/video.%04d.png",opt$image.dir,opt$step+1)
 if(file.exists(e.file)) e.data<-unpack.image.forecast(e.file)
 
 land<-WeatherMap.get.land(Options)
@@ -149,17 +145,19 @@ for(hour in seq(0,5,1)) {
    c.data<-s.data
    if(hour>0) {
      for(var in c('prmsl','prate','air.2m')) {
-       c.data[[var]]$data[]<-e.data[[var]]$data*hour/6
+       c.data[[var]]$data[]<-e.data[[var]]$data*hour/6 +
                              s.data[[var]]$data*(1-hour/6)
      }
    }
 
-   opfile<-sprintf("%s/video.interp.%04d.%02d.png",opt$image.dir,step,as.integer(hour*10))
+   opfile<-sprintf("%s/video.interp.%04d.%02d.png",opt$image.dir,opt$step,as.integer(hour*10))
     
     t2m<-c.data$air.2m
     prmsl.T<-c.data$prmsl
     prate<-c.data$prate
-    img.label<-"+%d:%02d",as.integer((step*6+hour)/24),as.integer((step*6+hour)%%24)
+   img.label<-sprintf("+%d:%02d",
+                      as.integer((opt$step*6+hour)/24),
+                      as.integer((opt$step*6+hour)%%24))
  
      png(opfile,
              width=1080*16/9,
