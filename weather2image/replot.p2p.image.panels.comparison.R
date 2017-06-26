@@ -166,7 +166,7 @@ Draw.pressure<-function(mslp,Options,colour=c(0,0,0)) {
       if(!is.null(Options$vp.lat.max)) lat.max<-Options$vp.lat.max
       base.gp<-gpar(family='Helvetica',font=1,col='black')
 
-# Composite forecast plot in top left
+# Composite target in top left
     pushViewport(viewport(x=unit(0.25,'npc'),y=unit(0.75,'npc'),
                  width=unit(0.4944,'npc'),height=unit(0.49,'npc'),
                  gp=base.gp))
@@ -178,14 +178,14 @@ Draw.pressure<-function(mslp,Options,colour=c(0,0,0)) {
                                 extension=0,gp=base.gp))
     
       WeatherMap.draw.land(land,Options)
-      Draw.temperature(f.data$air.2m,Options,Trange=10)
-      WeatherMap.draw.precipitation(f.data$prate,Options)
-      Draw.pressure(f.data$prmsl,Options,colour=c(0,0,0))
+      Draw.temperature(v.data$air.2m,Options,Trange=10)
+      WeatherMap.draw.precipitation(v.data$prate,Options)
+      Draw.pressure(v.data$prmsl,Options,colour=c(0,0,0))
       popViewport()
 
     popViewport()
 
-  # Composite target in top right
+  # Composite forecast in top right
     pushViewport(viewport(x=unit(0.75,'npc'),y=unit(0.75,'npc'),
                  width=unit(0.4944,'npc'),height=unit(0.49,'npc'),
                  gp=base.gp))
@@ -196,9 +196,9 @@ Draw.pressure<-function(mslp,Options,colour=c(0,0,0)) {
       pushViewport(dataViewport(c(lon.min,lon.max),c(lat.min,lat.max),
                                 extension=0,gp=base.gp))
       WeatherMap.draw.land(land,Options)
-      Draw.temperature(v.data$air.2m,Options,Trange=10)
-      WeatherMap.draw.precipitation(v.data$prate,Options)
-      Draw.pressure(v.data$prmsl,Options,colour=c(0,0,0))
+      Draw.temperature(f.data$air.2m,Options,Trange=10)
+      WeatherMap.draw.precipitation(f.data$prate,Options)
+      Draw.pressure(f.data$prmsl,Options,colour=c(0,0,0))
       popViewport()
 
     popViewport()

@@ -10,12 +10,12 @@ library(jpeg)
 
 opt = getopt(c(
   'image',   'i', 2, "character",
-  'left',    'l', 2, "boolean",
+  'left',    'l', 2, "logical",
   'output',  'o', 2, "character",
   'label',   'c', 2, "character"
 ))
 if ( is.null(opt$image) ) stop("Image file not specified") 
-if ( is.null(opt$left) )  opt$left<-TRUE
+if ( is.null(opt$left) ) opt$left<-TRUE
 if ( is.null(opt$output) ) stop("Output file not specified") 
 
 Imagedir<-dirname(opt$output)
@@ -45,9 +45,9 @@ unpack.image<-function(image.file) {
     stop(sprintf("Invalid image dimensions for %s",image.file))
   }
   if(opt$left) {
-    img<-img[,1:256,]
+      img<-img[,1:256,]
   } else {
-    img<-img[,257-512,]
+    img<-img[,257:512,]
   }
   g<-GSDF()
   g$dimensions[[1]]<-list(type='lat',
