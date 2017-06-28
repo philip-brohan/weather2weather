@@ -218,7 +218,7 @@ Draw.pressure<-function(mslp,Options,colour=c(0,0,0)) {
       WeatherMap.draw.land(land,Options)
       t.increment<-v.data$prmsl
       t.increment$data[]<-t.increment$data-s.data$prmsl$data
-      Draw.temperature(t.increment,Options,Trange=1000)
+      Draw.temperature(t.increment,Options,Trange=2000)
       popViewport()
 
     popViewport()
@@ -237,7 +237,7 @@ Draw.pressure<-function(mslp,Options,colour=c(0,0,0)) {
       WeatherMap.draw.land(land,Options)
       f.increment<-f.data$prmsl
       f.increment$data[]<-f.increment$data-s.data$prmsl$data
-      Draw.temperature(f.increment,Options,Trange=1000)
+      Draw.temperature(f.increment,Options,Trange=2000)
 
       if(!is.null(opt$label)) {
         Options$label<-opt$label

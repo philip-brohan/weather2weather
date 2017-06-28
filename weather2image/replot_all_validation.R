@@ -12,7 +12,7 @@ if ( is.null(opt$output.dir) ) stop("Output directory not specified")
 if(!file.exists(opt$output.dir)) dir.create(opt$output.dir,recursive=TRUE)
 sink(sprintf("%s/index.html",opt$output.dir))
 cat("<html><body><table cellspacing=10 border=1>\n")
-for(case in seq(0,99)) {
+for(case in seq(3,3)) {
   of<-sprintf("%s/%04d.png",opt$output.dir,case)
   cmd<-sprintf("./weather2image/replot.p2p.image.panels.comparison.R --forecast=%s/%d-outputs.png --input=%s/%d-inputs.png --target=%s/%d-targets.png --output=%s",
                opt$input.dir,case,
