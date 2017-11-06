@@ -14,7 +14,7 @@ Then we need to take a training set (400) of those pairs of images and pack them
 
 Alternatively, you can get the set of training and test images I used from [Dropbox](https://www.dropbox.com/s/0knxkll2btjjnyl/weather2weather_imgs.tar).
 
-Then train a model on this set for 200 epochs - with a fast GPU this should take about 1 hour, but, CPU-only, it takes a bit over 24 hours on my 4-core iMac. (It took about 2 hours on one gpu-node of [Isambard](http://gw4.ac.uk/isambard/)
+Then train a model on this set for 200 epochs - with a fast GPU this should take about 1 hour, but, CPU-only, it takes a bit over 24 hours on my 4-core iMac. (It took about 2 hours on one gpu-node of [Isambard](http://gw4.ac.uk/isambard/)).
 
 ```sh
 python weather2weather.py \
