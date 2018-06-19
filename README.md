@@ -47,7 +47,7 @@ To postprocess all the test cases run:
 
 This will produce an HTML file at  `$SCRATCH/weather2weather/model_test/index.html` showing results of all the test cases.
 
-
+This clearly does have skill at 6-hour weather forecasts - it gets the semi-diurnal oscillation, and some of the extratropical structure. The final step is to use the model on it's own output - by making repeated 6-hour forecasts we can make a forecast as far into the future as we like. [This is less successful](https://vimeo.com/275778137).
 
 ## Acknowledgments
 Derived from [pix2pix-tensorflow](https://github.com/affinelayer/pix2pix-tensorflow).
